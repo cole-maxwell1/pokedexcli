@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func callbackHelp() error {
+func callbackHelp(state *State) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("")
 	fmt.Println("Usage: <command> <arguments>")

@@ -7,9 +7,28 @@ import (
 	"net/http"
 )
 
-func (c *PokeapiClient) GetLocationAreas() (LocationAreasResponse, error) {
+func (c *PokeapiClient) GetLocationAreas(url *string) (LocationAreasResponse, error) {
 	endpoint := "/location-area"
 	fullUrl := baseUrl + endpoint
+
+	if url != nil {
+		fullUrl = *url
+	}
+
+	// Check if request has be cached
+	cachedResp, ok := c.cache.Get(fullUrl)
+
+	if ok {
+		locationAreasData := LocationAreasResponse{}
+		fmt.Println("Cache hit!")
+		err := json.Unmarshal(cachedResp, &locationAreasData)
+
+		if err != nil {
+			return LocationAreasResponse{}, err
+		}
+		return locationAreasData, nil
+	}
+	fmt.Println("Cache miss... making a request!")
 
 	// Create request
 	req, err := http.NewRequest("GET", fullUrl, nil)
@@ -40,6 +59,8 @@ func (c *PokeapiClient) GetLocationAreas() (LocationAreasResponse, error) {
 	if err != nil {
 		return LocationAreasResponse{}, err
 	}
+
+	c.cache.Add(fullUrl, data)
 
 	return locationAreasData, nil
 
